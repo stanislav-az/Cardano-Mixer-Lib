@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Crypto
 (
     module Crypto.BLS12381,
@@ -23,3 +25,12 @@ import           Crypto.Polynomial
 import           Crypto.R1CS
 import           Crypto.ZKSNARK
 import           Crypto.Zp
+import qualified PlutusTx
+
+PlutusTx.makeIsDataIndexed ''ReducedReferenceString [('ReducedReferenceString, 0)]
+PlutusTx.makeIsDataIndexed ''PublicSignals [('PublicSignals, 0)]
+PlutusTx.makeIsDataIndexed ''Proof [('Proof, 0)]
+PlutusTx.makeIsDataIndexed ''CurvePoint [('CP, 0), ('O, 1)]
+PlutusTx.makeIsDataIndexed ''Extension [('E, 0)]
+PlutusTx.makeIsDataIndexed ''Polynomial [('P, 0)]
+PlutusTx.makeIsDataIndexed ''E2 [('E2, 0)]
