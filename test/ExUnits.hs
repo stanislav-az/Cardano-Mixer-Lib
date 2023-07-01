@@ -3,11 +3,12 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module ExUnits where
 
 import Crypto
-import Plutus.V1.Ledger.Contexts (ScriptContext)
+import Plutus.V1.Ledger.Contexts
 import PlutusTx.Prelude
 import Ledger.Typed.Scripts as Scripts
 import qualified PlutusTx
@@ -56,7 +57,7 @@ validatorTest
 validatorTest validator crs ps proof =
     let scriptSBS = contractSBS validator
         arguments =
-            [Plutus.toData crs, Plutus.toData (ps, proof), Plutus.toData ()]
+            [Plutus.toData crs, Plutus.toData (ps, proof), Plutus.toData mkSimpleContext]
     in  Plutus.evaluateScriptCounting
                 (Plutus.ProtocolVersion 7 0)
                 Plutus.Verbose
@@ -76,3 +77,28 @@ runTest = do
     let (_, pubIns, proof) = generateSimulatedWithdrawProof secret testPKH testDepositSecret testShieldedAccountSecret testMixerState
     let ps = toWithdrawPublicSignals pubIns
     print $ validatorTest zkpValidator withdrawCRS ps proof
+
+mkSimpleContext
+    :: ScriptContext
+mkSimpleContext = ScriptContext txInfo purpose
+  where
+    txInfo :: TxInfo
+    txInfo =
+        TxInfo
+            { txInfoInputs = []
+            , txInfoOutputs = []
+            , txInfoFee = mempty
+            , txInfoMint = mempty
+            , txInfoDCert = []
+            , txInfoWdrl = []
+            , txInfoValidRange = Plutus.always
+            , txInfoSignatories = []
+            , txInfoData = []
+            , txInfoId = TxId "ffffffffffffffffffffffffffffffff"
+            }
+
+    purpose :: ScriptPurpose
+    purpose = Spending $ TxOutRef someTxId 0
+
+    someTxId :: TxId
+    someTxId = TxId "dddddddddddddddddddddddddddddddd"
